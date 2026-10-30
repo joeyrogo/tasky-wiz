@@ -10,6 +10,8 @@ module "eks" {
 
   cluster_endpoint_public_access = true
 
+  cluster_enabled_log_types = ["api", "audit", "authenticator", "controllerManager", "scheduler"]
+
   eks_managed_node_groups = {
     ng_private = {
       instance_types = ["t3.medium"]

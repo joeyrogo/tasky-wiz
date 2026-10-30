@@ -34,5 +34,5 @@ aws s3 cp /tmp/db-$TS.gz s3://${bucket_name}/db-$TS.gz
 rm /tmp/db-$TS.gz
 SCRIPT
 chmod +x /usr/local/bin/mongo-backup.sh
-echo "0 2 * * * root /usr/local/bin/mongo-backup.sh" > /etc/cron.d/mongo-backup
+echo "0 2 * * * root PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin /usr/local/bin/mongo-backup.sh" > /etc/cron.d/mongo-backup
 /usr/local/bin/mongo-backup.sh
