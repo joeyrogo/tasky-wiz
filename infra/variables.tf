@@ -13,14 +13,3 @@ variable "backup_password" {
 variable "tasky_password" {
   sensitive = true
 }
-
-variable "github_owner" {
-  description = "Your personal GitHub username (owner of the tasky-wiz repo)"
-  type        = string
-  default     = "joeyrogo"
-}
-
-variable "github_repo" {
-  description = "Repo name from the Phase 0 walkthrough (gh repo create tasky-wiz --private)"
-  default     = "tasky-wiz"
-}
