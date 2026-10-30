@@ -22,3 +22,19 @@ Makefile
 deploy
 test
 tmp
+
+# Terraform - secrets live in state, never commit
+infra/wiz-lab
+infra/.terraform/
+infra/.terraform.lock.hcl
+infra/terraform.tfstate
+infra/terraform.tfstate.backup
+infra/tfplan
+infra/*.tfvars
+
+# Local AWS/IAM scratch files
+deny-trail-tamper.json
+github-trust.json
+iam_policy.json
+policy.json
+trust.json

@@ -1,0 +1,63 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: tasky-sa
+  namespace: tasky
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: tasky-cluster-admin
+subjects:
+- kind: ServiceAccount
+  name: tasky-sa
+  namespace: tasky
+roleRef:
+  kind: ClusterRole
+  name: cluster-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tasky
+  namespace: tasky
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tasky
+  template:
+    metadata:
+      labels:
+        app: tasky
+    spec:
+      serviceAccountName: tasky-sa
+      containers:
+      - name: tasky
+        image: 127677820461.dkr.ecr.us-east-2.amazonaws.com/tasky:__TAG__
+        ports:
+        - containerPort: 8080
+        env:
+        - name: MONGODB_URI
+          valueFrom:
+            secretKeyRef:
+              name: tasky-secrets
+              key: MONGODB_URI
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: tasky-secrets
+              key: SECRET_KEY
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tasky
+  namespace: tasky
+spec:
+  selector:
+    app: tasky
+  ports:
+  - port: 80
+    targetPort: 8080
