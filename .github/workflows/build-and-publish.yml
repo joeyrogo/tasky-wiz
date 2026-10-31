@@ -59,7 +59,9 @@ jobs:
           scan-ref: .
           skip-dirs: infra
           format: table
-          severity: CRITICAL,HIGH
+          # MEDIUM included on purpose: Trivy rates the cluster-admin binding
+          # (KSV-0111) as MEDIUM, so a HIGH/CRITICAL filter hides it.
+          severity: CRITICAL,HIGH,MEDIUM
           # Report-only, same reasoning as the IaC scan: the exercise requires
           # the app to run with cluster-admin, so failing on it would block the deploy.
           exit-code: "0"
