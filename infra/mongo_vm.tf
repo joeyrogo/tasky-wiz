@@ -84,4 +84,11 @@ resource "aws_instance" "mongo_vm" {
   })
 
   tags = { Name = "mongo-vm" }
+
+  # user_data only runs at first boot (cloud-init). Changing it on a running
+  # instance just stops/starts the database VM and changes its public IP,
+  # so later edits apply only to a rebuilt instance, never this one.
+  lifecycle {
+    ignore_changes = [user_data]
+  }
 }

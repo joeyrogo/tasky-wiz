@@ -17,6 +17,11 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
+
+  # Cloud Labs stamps this partner tag on resources; it isn't ours to manage.
+  ignore_tags {
+    keys = ["aws-apn-id"]
+  }
 }
 
 data "aws_caller_identity" "current" {}
