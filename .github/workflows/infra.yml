@@ -1,0 +1,93 @@
+name: Deploy Infrastructure (Terraform)
+
+# Pipeline 2 of 2: Infrastructure as Code.
+# Plan + IaC security scan run automatically on any change under infra/.
+# Apply only runs when triggered manually (Actions tab > Run workflow > apply = true),
+# so a stray push can never rebuild the live environment by accident.
+
+on:
+  push:
+    branches: [master]
+    paths: ["infra/**", ".github/workflows/infra.yml"]
+  pull_request:
+    branches: [master]
+    paths: ["infra/**", ".github/workflows/infra.yml"]
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Run terraform apply after plan"
+        type: boolean
+        default: false
+
+env:
+  AWS_REGION: us-east-2
+  TF_VERSION: "1.17.1"   # must match the version that wrote the remote state
+  TF_VAR_backup_password: ${{ secrets.TF_VAR_BACKUP_PASSWORD }}
+  TF_VAR_tasky_password: ${{ secrets.TF_VAR_TASKY_PASSWORD }}
+
+permissions:
+  contents: read
+
+# Never let two Terraform runs touch the same state at once.
+concurrency:
+  group: terraform-wiz-lab
+  cancel-in-progress: false
+
+jobs:
+  iac-scan:
+    name: IaC security scan (Trivy)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Scan Terraform with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: infra
+          format: table
+          severity: CRITICAL,HIGH
+          # Report-only: the exercise REQUIRES intentional weaknesses
+          # (public SSH, public bucket, overly permissive VM role), so
+          # failing on them would block the build by design.
+          exit-code: "0"
+
+  terraform:
+    name: Terraform plan / apply
+    needs: iac-scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: infra
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TF_VERSION }}
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+      - name: Terraform fmt
+        run: terraform fmt -check -recursive
+
+      - name: Terraform init
+        run: terraform init -input=false
+
+      - name: Terraform validate
+        run: terraform validate -no-color
+
+      - name: Terraform plan
+        run: terraform plan -input=false -no-color -out=tfplan
+
+      - name: Terraform apply
+        if: github.event_name == 'workflow_dispatch' && inputs.apply == true
+        run: terraform apply -input=false -no-color tfplan

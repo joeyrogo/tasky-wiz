@@ -3,6 +3,7 @@ name: Build, Scan, and Deploy Tasky
 on:
   push:
     branches: [master]
+    paths-ignore: ["infra/**", ".github/workflows/infra.yml"]
   workflow_dispatch: {}
 
 env:
