@@ -1,0 +1,13 @@
+# Dependabot: weekly update PRs for Go dependencies and GitHub Actions.
+# The github-actions entry also keeps action versions current
+# (e.g. moving off the deprecated Node 20 runtime).
+version: 2
+updates:
+  - package-ecosystem: gomod
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

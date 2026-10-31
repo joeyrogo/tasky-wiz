@@ -52,6 +52,18 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL,HIGH
 
+      - name: Scan Kubernetes manifests and Dockerfile with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: config
+          scan-ref: .
+          skip-dirs: infra
+          format: table
+          severity: CRITICAL,HIGH
+          # Report-only, same reasoning as the IaC scan: the exercise requires
+          # the app to run with cluster-admin, so failing on it would block the deploy.
+          exit-code: "0"
+
       - name: Push image to ECR
         run: docker push ${{ steps.build.outputs.image }}
 
