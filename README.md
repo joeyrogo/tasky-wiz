@@ -27,5 +27,5 @@ Original project: https://github.com/dogukanozdemir/golang-todo-mongodb
 
 Change Nov 1
 
-
-Password:123456
+AWS_ACCESS_KEY_ID=AKIAIOSFODNN7EXAMPLE
+AWS_SECRET_ACCESS_KEY=wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY
