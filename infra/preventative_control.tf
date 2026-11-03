@@ -1,6 +1,7 @@
 # Preventative control: stop anyone -- including this lab account's own
 # admin-equivalent user -- from disabling or deleting the audit trail
-# built in github_oidc.tf / the CloudTrail setup. An explicit Deny always
+# built in github_oidc.tf / the CloudTrail setup, or from turning off
+# GuardDuty, the detective control. An explicit Deny always
 # wins over an Allow in IAM's evaluation logic, regardless of what other
 # broad permissions the principal holds.
 
@@ -25,6 +26,17 @@ resource "aws_iam_user_policy" "deny_trail_tamper" {
         "cloudtrail:UpdateTrail"
       ]
       Resource = "*"
+      },
+      {
+        Sid    = "DenyDetectionTampering"
+        Effect = "Deny"
+        Action = [
+          "guardduty:DeleteDetector",
+          "guardduty:UpdateDetector",
+          "guardduty:DisassociateFromMasterAccount",
+          "guardduty:DisassociateFromAdministratorAccount"
+        ]
+        Resource = "*"
     }]
   })
 }
